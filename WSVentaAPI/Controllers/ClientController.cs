@@ -1,18 +1,21 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WSVentaAPI.Models.Request;
 using WSVentaAPI.Models;
+using Microsoft.AspNetCore.Authorization;
+using WSVentaAPI.Models.Response;
 
 namespace WSVentaAPI.Controllers
 {
     [ApiController]
     [Route("WSVenta/Clientes")]
+    [Authorize]
     public class ClientController : ControllerBase
     {
         [HttpGet]
         [Route("List")]
         public IActionResult Get()
         {
-            Models.Response.Response _oResponse = new Models.Response.Response();
+            Response _oResponse = new Response();
             try
             {
                 using (VentaRealContext db = new VentaRealContext())
@@ -21,7 +24,6 @@ namespace WSVentaAPI.Controllers
                     _oResponse.Success = true;
                     _oResponse.Message = "";
                     _oResponse.Data = _list;
-
                 }
             }
             catch (Exception ex)
@@ -41,7 +43,7 @@ namespace WSVentaAPI.Controllers
         [Produces("application/json")]
         public IActionResult Add([FromBody] ClientRequest _oModel)
         {
-            Models.Response.Response _oResponse = new Models.Response.Response();
+            Response _oResponse = new Response();
             try
             {
                 using (VentaRealContext db = new VentaRealContext())
@@ -54,8 +56,6 @@ namespace WSVentaAPI.Controllers
 
                     _oResponse.Success = true;
                 }
-
-
             }
             catch (Exception ex)
             {
@@ -63,7 +63,6 @@ namespace WSVentaAPI.Controllers
                 _oResponse.Message = ex.Message;
                 _oResponse.Data = "";
             }
-
 
             return Ok(_oResponse);
         }
@@ -73,7 +72,7 @@ namespace WSVentaAPI.Controllers
         [Route("Edit")]
         public IActionResult Edit(ClientRequest _oModel)
         {
-            Models.Response.Response _oResponse = new Models.Response.Response();
+            Response _oResponse = new Response();
             try
             {
                 using (VentaRealContext db = new VentaRealContext())
@@ -110,7 +109,7 @@ namespace WSVentaAPI.Controllers
         [Route("Delete")]
         public IActionResult Delete(Cliente _oModel)
         {
-            Models.Response.Response _oResponse = new Models.Response.Response();
+            Response _oResponse = new Response();
             try
             {
                 using (VentaRealContext db = new VentaRealContext())
@@ -137,7 +136,7 @@ namespace WSVentaAPI.Controllers
         [HttpDelete("Delete/{Id}")]
         public IActionResult Delete2(int Id)
         {
-            Models.Response.Response _oResponse = new Models.Response.Response();
+            Response _oResponse = new Response();
             try
             {
                 using (VentaRealContext db = new VentaRealContext())

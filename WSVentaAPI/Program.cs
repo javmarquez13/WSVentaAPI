@@ -2,6 +2,12 @@
 //var builder = WebApplication.CreateBuilder(args); //original
 
 //added for enable cors 
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using WSVentaAPI.Models.Common;
+using WSVentaAPI.Services;
+
 var MyAllowSpecificOrigins = "MyCors";
 
 
@@ -16,31 +22,49 @@ builder.Services.AddCors(options =>
                           policy.WithHeaders("*");
                           policy.WithMethods("*");
                       });
+});
 
-
-    //options.AddPolicy("AllowAll",
-    //              policy =>
-    //              {
-    //                  policy.AllowAnyHeader();
-    //                  policy.AllowAnyOrigin();
-    //                  policy.AllowAnyMethod();                      
-    //              });
-}); //hasta aqui
-
-
-// Add services to the container.
-
+// Add services to the container
 builder.Services.AddControllers();
+
+
+#region auth JSON
+var appSettingsSection = builder.Configuration.GetSection("AppSettings");
+builder.Services.Configure<AppSettings>(appSettingsSection);
+
+//From now on is Json web Token jwt
+var appSettings = appSettingsSection.Get<AppSettings>();
+var key = Encoding.ASCII.GetBytes(appSettings.Secret);
+builder.Services.AddAuthentication(d =>
+{
+    d.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    d.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddJwtBearer(d =>
+    {
+        d.RequireHttpsMetadata = false;
+        d.SaveToken = true;
+        d.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(key),
+            ValidateIssuer = false,
+            ValidateAudience = false
+        };
+    });
+
+builder.Services.AddScoped<IUserService, UserService>();
+#endregion
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 app.UseCors(MyAllowSpecificOrigins);
-//app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-app.UseHttpsRedirection();
-app.UseStaticFiles();
-app.UseRouting();
+
+//JWT
+app.UseAuthentication();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
