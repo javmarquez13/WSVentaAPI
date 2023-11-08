@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace WSVentaAPI.Models;
+namespace WSVentaAPI;
 
 public partial class VentaRealContext : DbContext
 {

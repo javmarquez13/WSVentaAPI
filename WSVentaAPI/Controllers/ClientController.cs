@@ -3,6 +3,7 @@ using WSVentaAPI.Models.Request;
 using WSVentaAPI.Models;
 using Microsoft.AspNetCore.Authorization;
 using WSVentaAPI.Models.Response;
+using WSVentaAPI.Services;
 
 namespace WSVentaAPI.Controllers
 {
@@ -11,6 +12,14 @@ namespace WSVentaAPI.Controllers
     [Authorize]
     public class ClientController : ControllerBase
     {
+        IClientService _iClientService;
+
+        public ClientController(IClientService iClientService) 
+        {
+            _iClientService = iClientService;
+        }
+
+
         [HttpGet]
         [Route("List")]
         public IActionResult Get()
@@ -18,13 +27,10 @@ namespace WSVentaAPI.Controllers
             Response _oResponse = new Response();
             try
             {
-                using (VentaRealContext db = new VentaRealContext())
-                {
-                    var _list = db.Clientes.OrderByDescending(d => d.Id).ToList();
-                    _oResponse.Success = true;
-                    _oResponse.Message = "";
-                    _oResponse.Data = _list;
-                }
+                var _list = _iClientService.Get();
+                _oResponse.Success = true;
+                _oResponse.Message = "";
+                _oResponse.Data = _list;
             }
             catch (Exception ex)
             {
@@ -41,21 +47,13 @@ namespace WSVentaAPI.Controllers
         [HttpPost]
         [Route("Add")]
         [Produces("application/json")]
-        public IActionResult Add([FromBody] ClientRequest _oModel)
+        public IActionResult Add([FromBody] ClientRequest oModel)
         {
             Response _oResponse = new Response();
             try
             {
-                using (VentaRealContext db = new VentaRealContext())
-                {
-                    Cliente _oCliente = new Cliente();
-                    _oCliente.Name = _oModel.Name;
-
-                    db.Clientes.Add(_oCliente);
-                    db.SaveChanges();
-
-                    _oResponse.Success = true;
-                }
+                _iClientService.Add(oModel);
+                _oResponse.Success = true;
             }
             catch (Exception ex)
             {
@@ -70,23 +68,13 @@ namespace WSVentaAPI.Controllers
 
         [HttpPut]
         [Route("Edit")]
-        public IActionResult Edit(ClientRequest _oModel)
+        public IActionResult Update(ClientRequest oModel)
         {
             Response _oResponse = new Response();
             try
             {
-                using (VentaRealContext db = new VentaRealContext())
-                {
-                    Cliente _oCliente = db.Clientes.Find(_oModel.Id);
-
-                    _oCliente.Name = _oModel.Name;
-                    db.Entry(_oCliente).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
-                    db.SaveChanges();
-
-                    _oResponse.Success = true;
-                }
-
-
+                _iClientService.Update(oModel);
+                _oResponse.Success = true;
             }
             catch (Exception ex)
             {
@@ -100,26 +88,15 @@ namespace WSVentaAPI.Controllers
         }
 
 
-        /// <summary>
-        /// By ID
-        /// </summary>
-        /// <param name="_oModel"></param>
-        /// <returns></returns>
         [HttpDelete]
         [Route("Delete")]
-        public IActionResult Delete(Cliente _oModel)
+        public IActionResult Delete(Client oModel)
         {
             Response _oResponse = new Response();
             try
             {
-                using (VentaRealContext db = new VentaRealContext())
-                {
-                    Cliente _oCliente = db.Clientes.Find(_oModel.Id);
-                    db.Remove(_oCliente);
-                    db.SaveChanges();
-
-                    _oResponse.Success = true;
-                }
+                _iClientService.Delete(oModel);
+                _oResponse.Success = true;                
             }
             catch (Exception ex)
             {
@@ -127,25 +104,19 @@ namespace WSVentaAPI.Controllers
                 _oResponse.Message = ex.Message;
                 _oResponse.Data = "";
             }
-
 
             return Ok(_oResponse);
         }
 
 
         [HttpDelete("Delete/{Id}")]
-        public IActionResult Delete2(int Id)
+        public IActionResult DeleteById(int Id)
         {
             Response _oResponse = new Response();
             try
             {
-                using (VentaRealContext db = new VentaRealContext())
-                {
-                    Cliente _oCliente = db.Clientes.Find(Id);
-                    db.Remove(_oCliente);
-                    db.SaveChanges();
-                    _oResponse.Success = true;
-                }
+               _iClientService.DeleteById(Id);
+               _oResponse.Success = true;               
             }
             catch (Exception ex)
             {

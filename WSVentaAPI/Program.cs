@@ -53,7 +53,11 @@ builder.Services.AddAuthentication(d =>
         };
     });
 
+
+//Dependency Injection
 builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<ISaleService, SaleService>();
+builder.Services.AddScoped<IClientService, ClientService>();
 #endregion
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
